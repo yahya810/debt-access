@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
@@ -20,10 +20,10 @@
 </head>
 <body>
     <div class="container">
-        <h1>🔐 بياناتي الحية من أي مكان</h1>
+        <h1>🔐 بياناتي الحية من ي مكان</h1>
         
         <div class="login">
-            <p>أدخل كلمة المرور لعرض بياناتك:</p>
+            <p>دخل كلمة المرور لعرض بياناتك:</p>
             <input type="password" id="pass" placeholder="1234">
             <br>
             <button onclick="showData()">دخول</button>
@@ -35,6 +35,15 @@
     </div>
 
     <script>
+        function formatDateFromRecord(rec) {
+            if (rec["التاريخ"] && rec["الشهر"] && rec["السنة"]) {
+                return `${rec["التاريخ"]} ${rec["الشهر"]} ${rec["السنة"]}`;
+            }
+            if (rec["تاريخ التذكير"]) return rec["تاريخ التذكير"];
+            if (rec["تاريخ الاسترجاع"]) return rec["تاريخ الاسترجاع"];
+            return "—";
+        }
+
         function showData() {
             if (document.getElementById("pass").value !== "1234") {
                 alert("❌ كلمة المرور غير صحيحة!");
@@ -42,44 +51,90 @@
             }
             document.getElementById("data").innerHTML = '<div class="loading">جاري جلب البيانات من السحابة...</div>';
             
-            // جلب البيانات من Firebase (الآن مسموح بالقراءة!)
             fetch("https://debtapp-alg-default-rtdb.firebaseio.com/.json")
                 .then(response => response.json())
                 .then(data => {
                     let html = "";
-                    
+
                     // الشرائح
                     if (data.sim_cards) {
                         html += `<h2>📱 الشرائح والرصيد</h2><table><thead><tr><th>الاسم الكامل</th><th>نوع الشريحة</th><th>السعر</th><th>التاريخ</th></tr></thead><tbody>`;
                         Object.values(data.sim_cards).forEach(rec => {
-                            const date = rec["تاريخ التذكير"] ? new Date(rec["تاريخ التذكير"]) : "";
-                            const dateStr = date ? `${date.getDate()} ${["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"][date.getMonth()]} ${date.getFullYear()}` : "";
-                            html += `<tr><td>${rec["الاسم الكامل"] || ""}</td><td>${rec["نوع الشريحة"] || ""}</td><td>${rec["السعر"] || ""}</td><td>${dateStr}</td></tr>`;
+                            html += `<tr>
+                                <td>${rec["الاسم الكامل"] || ""}</td>
+                                <td>${rec["نوع الشريحة"] || ""}</td>
+                                <td>${rec["السعر"] || ""}</td>
+                                <td>${formatDateFromRecord(rec)}</td>
+                            </tr>`;
                         });
                         html += "</tbody></table>";
                     }
 
-                    // الأدوات
+                    // الدوات
                     if (data.household_tools) {
-                        html += `<h2>🛠️ الأدوات المنزلية</h2><table><thead><tr><th>الاسم الكامل</th><th>نوع الأداة</th><th>تاريخ الاسترجاع</th></tr></thead><tbody>`;
+                        html += `<h2>🛠️ الدوات المنزلية</h2><table><thead><tr><th>الاسم الكامل</th><th>نوع الداة</th><th>التاريخ</th></tr></thead><tbody>`;
                         Object.values(data.household_tools).forEach(rec => {
-                            const date = rec["تاريخ الاسترجاع"] ? new Date(rec["تاريخ الاسترجاع"]) : "";
-                            const dateStr = date ? `${date.getDate()} ${["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"][date.getMonth()]} ${date.getFullYear()}` : "";
-                            html += `<tr><td>${rec["الاسم الكامل"] || ""}</td><td>${rec["نوع الأداة"] || ""}</td><td>${dateStr}</td></tr>`;
+                            html += `<tr>
+                                <td>${rec["الاسم الكامل"] || ""}</td>
+                                <td>${rec["نوع الداة"] || ""}</td>
+                                <td>${formatDateFromRecord(rec)}</td>
+                            </tr>`;
                         });
                         html += "</tbody></table>";
                     }
 
-                    if (!data.sim_cards && !data.household_tools) {
+                    // المواد الغذائية
+                    if (data.food_items) {
+                        html += `<h2>🛒 المواد الغذائية</h2><table><thead><tr><th>الاسم الكامل</th><th>نوع المادة</th><th>السعر</th><th>التاريخ</th></tr></thead><tbody>`;
+                        Object.values(data.food_items).forEach(rec => {
+                            html += `<tr>
+                                <td>${rec["الاسم الكامل"] || ""}</td>
+                                <td>${rec["نوع المادة"] || ""}</td>
+                                <td>${rec["السعر"] || ""}</td>
+                                <td>${formatDateFromRecord(rec)}</td>
+                            </tr>`;
+                        });
+                        html += "</tbody></table>";
+                    }
+
+                    // الديون المستلمة
+                    if (data.received_debts) {
+                        html += `<h2>💰 الديون المستلمة</h2><table><thead><tr><th>الاسم الكامل</th><th>المبلغ</th><th>التاريخ</th></tr></thead><tbody>`;
+                        Object.values(data.received_debts).forEach(rec => {
+                            html += `<tr>
+                                <td>${rec["الاسم الكامل"] || ""}</td>
+                                <td>${rec["المبلغ"] || ""}</td>
+                                <td>${formatDateFromRecord(rec)}</td>
+                            </tr>`;
+                        });
+                        html += "</tbody></table>";
+                    }
+
+                    // الديون المستلفة
+                    if (data.lent_debts) {
+                        html += `<h2>💳 الديون المستلفة</h2><table><thead><tr><th>الاسم الكامل</th><th>شخص المستلف</th><th>المبلغ</th><th>التاريخ</th></tr></thead><tbody>`;
+                        Object.values(data.lent_debts).forEach(rec => {
+                            html += `<tr>
+                                <td>${rec["الاسم الكامل"] || ""}</td>
+                                <td>${rec["شخص المستلف"] || ""}</td>
+                                <td>${rec["المبلغ"] || ""}</td>
+                                <td>${formatDateFromRecord(rec)}</td>
+                            </tr>`;
+                        });
+                        html += "</tbody></table>";
+                    }
+
+                    if (!html) {
                         html = "<p>لا توجد بيانات بعد.</p>";
                     }
 
                     document.getElementById("data").innerHTML = html;
                 })
                 .catch(err => {
-                    document.getElementById("data").innerHTML = "<p style='color:red;'>❌ خطأ في تحميل البيانات. تحقق من الاتصال.</p>";
+                    document.getElementById("data").innerHTML = "<p style='color:red;'>❌ خط في تحميل البيانات. تحقق من الاتصال.</p>";
                 });
         }
     </script>
 </body>
 </html>
+
