@@ -1,72 +1,73 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>🔐 بياناتي</title>
+    <title>🔐 بياناتي الاحتياطية</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #f5f7fa; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
         h1 { color: #2c3e50; text-align: center; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .login { text-align: center; margin: 30px 0; }
+        input[type="password"] { padding: 12px; width: 220px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; direction: ltr; }
+        button { padding: 12px 30px; background: #3498db; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        button:hover { background: #2980b9; }
+        #data { display: none; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
         th, td { padding: 12px; text-align: right; border-bottom: 1px solid #eee; }
-        th { background: #f8f9fa; }
-        .password-form { text-align: center; margin: 30px 0; }
-        input[type="password"] { padding: 10px; width: 200px; direction: ltr; }
-        button { padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        th { background: #f8f9fa; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🔐 بياناتي الاحتياطية</h1>
         
-        <div class="password-form">
-            <p>أدخل كلمة المرور لعرض البيانات:</p>
+        <div class="login">
+            <p>دخل كلمة المرور لعرض بياناتك:</p>
             <input type="password" id="pass" placeholder="1234">
-            <br><br>
-            <button onclick="showData()">عرض البيانات</button>
+            <br>
+            <button onclick="showData()">دخول</button>
         </div>
 
-        <div id="data" style="display:none;">
-            <h2>📊 الشرائح والرصيد</h2>
+        <div id="data">
+            <h2>📱 الشرائح والرصيد</h2>
             <table>
-                <thead><tr><th>الاسم الكامل</th><th>نوع الشريحة</th><th>السعر</th><th>التاريخ</th></tr></thead>
-                <tbody id="sim-table"></tbody>
+                <thead><tr><th>الاسم الكامل</th><th>نوع الشريحة</th><th>السعر (دج)</th><th>تاريخ التذكير</th></tr></thead>
+                <tbody>
+                    <tr><td>كمال عبد الكريم</td><td>جيزي</td><td>2500</td><td>11 يناير 2026</td></tr>
+                </tbody>
             </table>
 
-            <h2>🛠️ الأدوات المنزلية</h2>
+            <h2>🛠️ الدوات المنزلية</h2>
             <table>
-                <thead><tr><th>الاسم الكامل</th><th>نوع الأداة</th><th>تاريخ الاسترجاع</th></tr></thead>
-                <tbody id="tool-table"></tbody>
+                <thead><tr><th>الاسم الكامل</th><th>نوع الداة</th><th>تاريخ الاسترجاع</th></tr></thead>
+                <tbody>
+                    <tr><td>حمد بكاي</td><td>مطرقة</td><td>11 يناير 2026</td></tr>
+                </tbody>
+            </table>
+
+            <h2>💰 الديون المستلمة</h2>
+            <table>
+                <thead><tr><th>الاسم الكامل</th><th>المبلغ (دج)</th></tr></thead>
+                <tbody>
+                    <tr><td>—</td><td>—</td></tr>
+                </tbody>
+            </table>
+
+            <h2>💳 الديون المستلفة</h2>
+            <table>
+                <thead><tr><th>الاسم الكامل</th><th>شخص المستلف</th><th>المبلغ (دج)</th></tr></thead>
+                <tbody>
+                    <tr><td>—</td><td>—</td><td>—</td></tr>
+                </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        const MASTER_PASSWORD = "1234";
-        const SIM_DATA = [
-            ["كمال عبد الكريم", "جيزي", "2500", "11 يناير 2026"]
-        ];
-        const TOOL_DATA = [
-            ["أحمد بكاي", "مطرقة", "11 يناير 2026"]
-        ];
-
         function showData() {
-            if (document.getElementById("pass").value === MASTER_PASSWORD) {
+            const pass = document.getElementById("pass").value;
+            if (pass === "1234") {
                 document.getElementById("data").style.display = "block";
-                
-                // عرض بيانات الشرائح
-                let simHtml = "";
-                SIM_DATA.forEach(row => {
-                    simHtml += `<tr><td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td><td>${row[3]}</td></tr>`;
-                });
-                document.getElementById("sim-table").innerHTML = simHtml;
-
-                // عرض بيانات الأدوات
-                let toolHtml = "";
-                TOOL_DATA.forEach(row => {
-                    toolHtml += `<tr><td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td></tr>`;
-                });
-                document.getElementById("tool-table").innerHTML = toolHtml;
             } else {
                 alert("❌ كلمة المرور غير صحيحة!");
             }
