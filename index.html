@@ -1,37 +1,29 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
     <title>🔐 بياناتي الحية</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; text-align: center; margin-bottom: 20px; }
-        .login { text-align: center; margin: 30px 0; }
-        input[type="password"] { padding: 12px; width: 220px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; direction: ltr; }
-        button { padding: 12px 30px; background: #3498db; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center; }
+        h1 { color: #2c3e50; margin-bottom: 20px; }
+        input[type="password"] { padding: 12px; width: 220px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; direction: ltr; margin: 10px 0; }
+        button { padding: 12px 30px; background: #3498db; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
         button:hover { background: #2980b9; }
-        #data { display: none; margin-top: 20px; }
+        #data { display: none; margin-top: 20px; text-align: right; }
         table { width: 100%; border-collapse: collapse; margin: 15px 0; }
         th, td { padding: 12px; text-align: right; border-bottom: 1px solid #eee; }
-        th { background: #f8f9fa; font-weight: bold; }
-        .loading { text-align: center; color: #7f8c8d; }
+        th { background: #f8f9fa; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🔐 بياناتي الحية من ي مكان</h1>
-        
-        <div class="login">
-            <p>دخل كلمة المرور لعرض بياناتك:</p>
-            <input type="password" id="pass" placeholder="1234">
-            <br>
-            <button onclick="showData()">دخول</button>
-        </div>
-
-        <div id="data">
-            <div class="loading">جارٍ تحميل البيانات...</div>
-        </div>
+        <p>دخل كلمة المرور لعرض بياناتك:</p>
+        <input type="password" id="pass" placeholder="1234">
+        <br>
+        <button onclick="showData()">دخول</button>
+        <div id="data"></div>
     </div>
 
     <script>
@@ -39,18 +31,18 @@
             if (rec["التاريخ"] && rec["الشهر"] && rec["السنة"]) {
                 return `${rec["التاريخ"]} ${rec["الشهر"]} ${rec["السنة"]}`;
             }
-            if (rec["تاريخ التذكير"]) return rec["تاريخ التذكير"];
-            if (rec["تاريخ الاسترجاع"]) return rec["تاريخ الاسترجاع"];
-            return "—";
+            return rec["تاريخ التذكير"] || rec["تاريخ الاسترجاع"] || "—";
         }
 
         function showData() {
-            if (document.getElementById("pass").value !== "1234") {
+            const pass = document.getElementById("pass").value;
+            if (pass !== "1234") {
                 alert("❌ كلمة المرور غير صحيحة!");
                 return;
             }
-            document.getElementById("data").innerHTML = '<div class="loading">جاري جلب البيانات من السحابة...</div>';
-            
+
+            document.getElementById("data").innerHTML = "<p>جارٍ تحميل البيانات من السحابة...</p>";
+
             fetch("https://debtapp-alg-default-rtdb.firebaseio.com/.json")
                 .then(response => response.json())
                 .then(data => {
@@ -58,80 +50,35 @@
 
                     // الشرائح
                     if (data.sim_cards) {
-                        html += `<h2>📱 الشرائح والرصيد</h2><table><thead><tr><th>الاسم الكامل</th><th>نوع الشريحة</th><th>السعر</th><th>التاريخ</th></tr></thead><tbody>`;
+                        html += `<h2>📱 الشرائح</h2><table><thead><tr><th>الاسم</th><th>النوع</th><th>السعر</th><th>التاريخ</th></tr></thead><tbody>`;
                         Object.values(data.sim_cards).forEach(rec => {
-                            html += `<tr>
-                                <td>${rec["الاسم الكامل"] || ""}</td>
-                                <td>${rec["نوع الشريحة"] || ""}</td>
-                                <td>${rec["السعر"] || ""}</td>
-                                <td>${formatDateFromRecord(rec)}</td>
-                            </tr>`;
+                            html += `<tr><td>${rec["الاسم الكامل"] || ""}</td><td>${rec["نوع الشريحة"] || ""}</td><td>${rec["السعر"] || ""}</td><td>${formatDateFromRecord(rec)}</td></tr>`;
                         });
                         html += "</tbody></table>";
                     }
 
                     // الدوات
                     if (data.household_tools) {
-                        html += `<h2>🛠️ الدوات المنزلية</h2><table><thead><tr><th>الاسم الكامل</th><th>نوع الداة</th><th>التاريخ</th></tr></thead><tbody>`;
+                        html += `<h2>🛠️ الدوات</h2><table><thead><tr><th>الاسم</th><th>النوع</th><th>التاريخ</th></tr></thead><tbody>`;
                         Object.values(data.household_tools).forEach(rec => {
-                            html += `<tr>
-                                <td>${rec["الاسم الكامل"] || ""}</td>
-                                <td>${rec["نوع الداة"] || ""}</td>
-                                <td>${formatDateFromRecord(rec)}</td>
-                            </tr>`;
+                            html += `<tr><td>${rec["الاسم الكامل"] || ""}</td><td>${rec["نوع الداة"] || ""}</td><td>${formatDateFromRecord(rec)}</td></tr>`;
                         });
                         html += "</tbody></table>";
                     }
 
                     // المواد الغذائية
                     if (data.food_items) {
-                        html += `<h2>🛒 المواد الغذائية</h2><table><thead><tr><th>الاسم الكامل</th><th>نوع المادة</th><th>السعر</th><th>التاريخ</th></tr></thead><tbody>`;
+                        html += `<h2>🛒 المواد الغذائية</h2><table><thead><tr><th>الاسم</th><th>النوع</th><th>السعر</th><th>التاريخ</th></tr></thead><tbody>`;
                         Object.values(data.food_items).forEach(rec => {
-                            html += `<tr>
-                                <td>${rec["الاسم الكامل"] || ""}</td>
-                                <td>${rec["نوع المادة"] || ""}</td>
-                                <td>${rec["السعر"] || ""}</td>
-                                <td>${formatDateFromRecord(rec)}</td>
-                            </tr>`;
+                            html += `<tr><td>${rec["الاسم الكامل"] || ""}</td><td>${rec["نوع المادة"] || ""}</td><td>${rec["السعر"] || ""}</td><td>${formatDateFromRecord(rec)}</td></tr>`;
                         });
                         html += "</tbody></table>";
                     }
 
-                    // الديون المستلمة
-                    if (data.received_debts) {
-                        html += `<h2>💰 الديون المستلمة</h2><table><thead><tr><th>الاسم الكامل</th><th>المبلغ</th><th>التاريخ</th></tr></thead><tbody>`;
-                        Object.values(data.received_debts).forEach(rec => {
-                            html += `<tr>
-                                <td>${rec["الاسم الكامل"] || ""}</td>
-                                <td>${rec["المبلغ"] || ""}</td>
-                                <td>${formatDateFromRecord(rec)}</td>
-                            </tr>`;
-                        });
-                        html += "</tbody></table>";
-                    }
-
-                    // الديون المستلفة
-                    if (data.lent_debts) {
-                        html += `<h2>💳 الديون المستلفة</h2><table><thead><tr><th>الاسم الكامل</th><th>شخص المستلف</th><th>المبلغ</th><th>التاريخ</th></tr></thead><tbody>`;
-                        Object.values(data.lent_debts).forEach(rec => {
-                            html += `<tr>
-                                <td>${rec["الاسم الكامل"] || ""}</td>
-                                <td>${rec["شخص المستلف"] || ""}</td>
-                                <td>${rec["المبلغ"] || ""}</td>
-                                <td>${formatDateFromRecord(rec)}</td>
-                            </tr>`;
-                        });
-                        html += "</tbody></table>";
-                    }
-
-                    if (!html) {
-                        html = "<p>لا توجد بيانات بعد.</p>";
-                    }
-
-                    document.getElementById("data").innerHTML = html;
+                    document.getElementById("data").innerHTML = html || "<p>لا توجد بيانات.</p>";
                 })
                 .catch(err => {
-                    document.getElementById("data").innerHTML = "<p style='color:red;'>❌ خط في تحميل البيانات. تحقق من الاتصال.</p>";
+                    document.getElementById("data").innerHTML = "<p style='color:red;'>❌ خط في الاتصال بالبيانات.</p>";
                 });
         }
     </script>
