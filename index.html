@@ -4,19 +4,73 @@
     <meta charset="UTF-8">
     <title>🔐 بياناتي</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f0f2f5; }
-        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
-        input[type="password"] { padding: 10px; width: 200px; margin: 10px 0; direction: ltr; }
+        body { font-family: Arial, sans-serif; background: #f5f7fa; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { padding: 12px; text-align: right; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; }
+        .password-form { text-align: center; margin: 30px 0; }
+        input[type="password"] { padding: 10px; width: 200px; direction: ltr; }
         button { padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        button:hover { background: #2980b9; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>🔐 دخل كلمة المرور</h2>
-        <input type="password" id="pass" placeholder="1234">
-        <br>
-        <button onclick="if(document.getElementById('pass').value=='1234'){window.location='https://debtapp-alg-default-rtdb.firebaseio.com/.json'}else{alert('❌ خاطئة!')}">دخول</button>
+        <h1>🔐 بياناتي الاحتياطية</h1>
+        
+        <div class="password-form">
+            <p>أدخل كلمة المرور لعرض البيانات:</p>
+            <input type="password" id="pass" placeholder="1234">
+            <br><br>
+            <button onclick="showData()">عرض البيانات</button>
+        </div>
+
+        <div id="data" style="display:none;">
+            <h2>📊 الشرائح والرصيد</h2>
+            <table>
+                <thead><tr><th>الاسم الكامل</th><th>نوع الشريحة</th><th>السعر</th><th>التاريخ</th></tr></thead>
+                <tbody id="sim-table"></tbody>
+            </table>
+
+            <h2>🛠️ الأدوات المنزلية</h2>
+            <table>
+                <thead><tr><th>الاسم الكامل</th><th>نوع الأداة</th><th>تاريخ الاسترجاع</th></tr></thead>
+                <tbody id="tool-table"></tbody>
+            </table>
+        </div>
     </div>
+
+    <script>
+        const MASTER_PASSWORD = "1234";
+        const SIM_DATA = [
+            ["كمال عبد الكريم", "جيزي", "2500", "11 يناير 2026"]
+        ];
+        const TOOL_DATA = [
+            ["أحمد بكاي", "مطرقة", "11 يناير 2026"]
+        ];
+
+        function showData() {
+            if (document.getElementById("pass").value === MASTER_PASSWORD) {
+                document.getElementById("data").style.display = "block";
+                
+                // عرض بيانات الشرائح
+                let simHtml = "";
+                SIM_DATA.forEach(row => {
+                    simHtml += `<tr><td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td><td>${row[3]}</td></tr>`;
+                });
+                document.getElementById("sim-table").innerHTML = simHtml;
+
+                // عرض بيانات الأدوات
+                let toolHtml = "";
+                TOOL_DATA.forEach(row => {
+                    toolHtml += `<tr><td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td></tr>`;
+                });
+                document.getElementById("tool-table").innerHTML = toolHtml;
+            } else {
+                alert("❌ كلمة المرور غير صحيحة!");
+            }
+        }
+    </script>
 </body>
 </html>
