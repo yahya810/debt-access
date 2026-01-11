@@ -2,83 +2,53 @@
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>🔐 بياناتي الحية</title>
+    <title>🔐 بياناتي</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center; }
-        h1 { color: #2c3e50; margin-bottom: 20px; }
-        input[type="password"] { padding: 12px; width: 220px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; direction: ltr; margin: 10px 0; }
-        button { padding: 12px 30px; background: #3498db; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
-        button:hover { background: #2980b9; }
-        #data { display: none; margin-top: 20px; text-align: right; }
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-        th, td { padding: 12px; text-align: right; border-bottom: 1px solid #eee; }
-        th { background: #f8f9fa; }
+        body { font-family: Arial, sans-serif; background: #f0f2f5; text-align: center; padding: 40px; }
+        .box { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
+        input[type="password"] { padding: 10px; width: 200px; margin: 10px 0; direction: ltr; }
+        button { padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        #data { margin-top: 20px; text-align: right; display: none; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🔐 بياناتي الحية من ي مكان</h1>
-        <p>دخل كلمة المرور لعرض بياناتك:</p>
+    <div class="box">
+        <h2>🔐 أدخل كلمة المرور</h2>
         <input type="password" id="pass" placeholder="1234">
         <br>
-        <button onclick="showData()">دخول</button>
+        <button onclick="loadData()">دخول</button>
         <div id="data"></div>
     </div>
 
     <script>
-        function formatDateFromRecord(rec) {
-            if (rec["التاريخ"] && rec["الشهر"] && rec["السنة"]) {
-                return `${rec["التاريخ"]} ${rec["الشهر"]} ${rec["السنة"]}`;
-            }
-            return rec["تاريخ التذكير"] || rec["تاريخ الاسترجاع"] || "—";
-        }
-
-        function showData() {
-            const pass = document.getElementById("pass").value;
-            if (pass !== "1234") {
-                alert("❌ كلمة المرور غير صحيحة!");
+        function loadData() {
+            if (document.getElementById("pass").value !== "1234") {
+                alert("❌ خاطئة!");
                 return;
             }
-
-            document.getElementById("data").innerHTML = "<p>جارٍ تحميل البيانات من السحابة...</p>";
-
+            document.getElementById("data").innerHTML = "جاري التحميل...";
+            document.getElementById("data").style.display = "block";
+            
             fetch("https://debtapp-alg-default-rtdb.firebaseio.com/.json")
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(data => {
-                    let html = "";
-
-                    // الشرائح
+                    let h = "<h3>📱 الشرائح:</h3><ul>";
                     if (data.sim_cards) {
-                        html += `<h2>📱 الشرائح</h2><table><thead><tr><th>الاسم</th><th>النوع</th><th>السعر</th><th>التاريخ</th></tr></thead><tbody>`;
-                        Object.values(data.sim_cards).forEach(rec => {
-                            html += `<tr><td>${rec["الاسم الكامل"] || ""}</td><td>${rec["نوع الشريحة"] || ""}</td><td>${rec["السعر"] || ""}</td><td>${formatDateFromRecord(rec)}</td></tr>`;
+                        Object.values(data.sim_cards).forEach(s => {
+                            h += `<li>${s["الاسم الكامل"]} - ${s["نوع الشريحة"]} (${s["السعر"]})</li>`;
                         });
-                        html += "</tbody></table>";
                     }
-
-                    // الدوات
+                    h += "</ul><h3>🛠️ الأدوات:</h3><ul>";
                     if (data.household_tools) {
-                        html += `<h2>🛠️ الدوات</h2><table><thead><tr><th>الاسم</th><th>النوع</th><th>التاريخ</th></tr></thead><tbody>`;
-                        Object.values(data.household_tools).forEach(rec => {
-                            html += `<tr><td>${rec["الاسم الكامل"] || ""}</td><td>${rec["نوع الداة"] || ""}</td><td>${formatDateFromRecord(rec)}</td></tr>`;
+                        Object.values(data.household_tools).forEach(t => {
+                            h += `<li>${t["الاسم الكامل"]} - ${t["نوع الأداة"]}</li>`;
                         });
-                        html += "</tbody></table>";
                     }
-
-                    // المواد الغذائية
-                    if (data.food_items) {
-                        html += `<h2>🛒 المواد الغذائية</h2><table><thead><tr><th>الاسم</th><th>النوع</th><th>السعر</th><th>التاريخ</th></tr></thead><tbody>`;
-                        Object.values(data.food_items).forEach(rec => {
-                            html += `<tr><td>${rec["الاسم الكامل"] || ""}</td><td>${rec["نوع المادة"] || ""}</td><td>${rec["السعر"] || ""}</td><td>${formatDateFromRecord(rec)}</td></tr>`;
-                        });
-                        html += "</tbody></table>";
-                    }
-
-                    document.getElementById("data").innerHTML = html || "<p>لا توجد بيانات.</p>";
+                    h += "</ul>";
+                    document.getElementById("data").innerHTML = h;
                 })
-                .catch(err => {
-                    document.getElementById("data").innerHTML = "<p style='color:red;'>❌ خط في الاتصال بالبيانات.</p>";
+                .catch(e => {
+                    document.getElementById("data").innerHTML = "❌ خطأ في الاتصال";
                 });
         }
     </script>
