@@ -45,10 +45,10 @@
                         });
                     }
                     h += "</ul>";
-                    document.getElementById("data").innerHTML = h || "<p>لا توجد بيانات.</p>";
+                    document.getElementById("data").innerHTML = h;
                 })
                 .catch(e => {
-                    document.getElementById("data").innerHTML = "❌ خطأ في الاتصال بالسحابة";
+                    document.getElementById("data").innerHTML = "❌ خطأ في الاتصال";
                 });
         }
     </script>
