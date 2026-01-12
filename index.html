@@ -2,53 +2,257 @@
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>🔐 بياناتي</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 نظام إدارة الديون - لوحة التحكم</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #f0f2f5; text-align: center; padding: 40px; }
-        .box { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
-        input[type="password"] { padding: 10px; width: 200px; margin: 10px 0; direction: ltr; }
-        button { padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        #data { margin-top: 20px; text-align: right; display: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #e4edf9);
+            color: #2c3e50;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            padding: 25px 0;
+            margin-bottom: 20px;
+        }
+        header h1 {
+            font-size: 28px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        header p {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        .login-box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 40px auto;
+            text-align: center;
+        }
+        .login-box input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            direction: ltr;
+            text-align: center;
+        }
+        .login-box button {
+            width: 100%;
+            padding: 12px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+        .login-box button:hover {
+            background: #2980b9;
+        }
+        #data-section {
+            display: none;
+        }
+        .section {
+            background: white;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .section-header {
+            background: #3498db;
+            color: white;
+            padding: 15px 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 14px 15px;
+            text-align: right;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        th {
+            background: #f8f9fa;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        tr:hover {
+            background: #f8f9fa;
+        }
+        .empty {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h2>🔐 أدخل كلمة المرور</h2>
-        <input type="password" id="pass" placeholder="1234">
-        <br>
-        <button onclick="loadData()">دخول</button>
-        <div id="data"></div>
+    <div class="container">
+        <header>
+            <h1>🔐 نظام إدارة الديون</h1>
+            <p>بياناتك الحية من أي مكان في العالم</p>
+        </header>
+
+        <div class="login-box" id="login-section">
+            <h2>🔒 حماية البيانات</h2>
+            <p>أدخل كلمة المرور للوصول إلى لوحة التحكم</p>
+            <input type="password" id="pass" placeholder="1234">
+            <button onclick="authenticate()">دخول</button>
+        </div>
+
+        <div id="data-section">
+            <!-- سيتم ملء الأقسام ديناميكيًا -->
+        </div>
+
+        <footer>
+            <p>© 2026 | نظام آمن • دقيق • موثوق</p>
+        </footer>
     </div>
 
     <script>
-        function loadData() {
-            if (document.getElementById("pass").value !== "1234") {
-                alert("❌ خاطئة!");
+        const MASTER_PASSWORD = "1234";
+
+        function formatDateFromRecord(rec) {
+            if (rec["التاريخ"] && rec["الشهر"] && rec["السنة"]) {
+                return `${rec["التاريخ"]} ${rec["الشهر"]} ${rec["السنة"]}`;
+            }
+            return rec["تاريخ التذكير"] || rec["تاريخ الاسترجاع"] || "—";
+        }
+
+        function authenticate() {
+            const pass = document.getElementById("pass").value;
+            if (pass !== MASTER_PASSWORD) {
+                alert("❌ كلمة المرور غير صحيحة!");
                 return;
             }
-            document.getElementById("data").innerHTML = "جاري التحميل...";
-            document.getElementById("data").style.display = "block";
-            
+            document.getElementById("login-section").style.display = "none";
+            document.getElementById("data-section").style.display = "block";
+            loadData();
+        }
+
+        function createTable(title, headers, records, renderRow) {
+            if (!records || records.length === 0) {
+                return `<div class="section"><div class="section-header">${title}</div><div class="empty">لا توجد بيانات</div></div>`;
+            }
+
+            let html = `<div class="section"><div class="section-header">${title}</div><table><thead><tr>`;
+            headers.forEach(h => html += `<th>${h}</th>`);
+            html += `</tr></thead><tbody>`;
+
+            records.forEach(rec => {
+                html += `<tr>${renderRow(rec)}</tr>`;
+            });
+
+            html += `</tbody></table></div>`;
+            return html;
+        }
+
+        function loadData() {
             fetch("https://debtapp-alg-default-rtdb.firebaseio.com/.json")
-                .then(r => r.json())
+                .then(response => response.json())
                 .then(data => {
-                    let h = "<h3>📱 الشرائح:</h3><ul>";
-                    if (data.sim_cards) {
-                        Object.values(data.sim_cards).forEach(s => {
-                            h += `<li>${s["الاسم الكامل"]} - ${s["نوع الشريحة"]} (${s["السعر"]})</li>`;
-                        });
-                    }
-                    h += "</ul><h3>🛠️ الأدوات:</h3><ul>";
-                    if (data.household_tools) {
-                        Object.values(data.household_tools).forEach(t => {
-                            h += `<li>${t["الاسم الكامل"]} - ${t["نوع الأداة"]}</li>`;
-                        });
-                    }
-                    h += "</ul>";
-                    document.getElementById("data").innerHTML = h;
+                    let output = "";
+
+                    // الشرائح
+                    const simCards = data.sim_cards ? Object.values(data.sim_cards) : [];
+                    output += createTable(
+                        "📱 الشرائح والرصيد",
+                        ["الاسم الكامل", "نوع الشريحة", "السعر (دج)", "التاريخ"],
+                        simCards,
+                        rec => `
+                            <td>${rec["الاسم الكامل"] || "—"}</td>
+                            <td>${rec["نوع الشريحة"] || "—"}</td>
+                            <td>${rec["السعر"] || "—"}</td>
+                            <td>${formatDateFromRecord(rec)}</td>
+                        `
+                    );
+
+                    // الأدوات المنزلية
+                    const tools = data.household_tools ? Object.values(data.household_tools) : [];
+                    output += createTable(
+                        "🛠️ الأدوات المنزلية",
+                        ["الاسم الكامل", "نوع الأداة", "تاريخ الاسترجاع"],
+                        tools,
+                        rec => `
+                            <td>${rec["الاسم الكامل"] || "—"}</td>
+                            <td>${rec["نوع الأداة"] || "—"}</td>
+                            <td>${formatDateFromRecord(rec)}</td>
+                        `
+                    );
+
+                    // المواد الغذائية
+                    const food = data.food_items ? Object.values(data.food_items) : [];
+                    output += createTable(
+                        "🛒 المواد الغذائية",
+                        ["الاسم الكامل", "نوع المادة", "السعر (دج)", "التاريخ"],
+                        food,
+                        rec => `
+                            <td>${rec["الاسم الكامل"] || "—"}</td>
+                            <td>${rec["نوع المادة"] || "—"}</td>
+                            <td>${rec["السعر"] || "—"}</td>
+                            <td>${formatDateFromRecord(rec)}</td>
+                        `
+                    );
+
+                    // الديون المستلمة
+                    const received = data.received_debts ? Object.values(data.received_debts) : [];
+                    output += createTable(
+                        "💰 الديون المستلمة",
+                        ["الاسم الكامل", "المبلغ (دج)", "التاريخ"],
+                        received,
+                        rec => `
+                            <td>${rec["الاسم الكامل"] || "—"}</td>
+                            <td>${rec["المبلغ"] || "—"}</td>
+                            <td>${formatDateFromRecord(rec)}</td>
+                        `
+                    );
+
+                    // الديون المستلفة
+                    const lent = data.lent_debts ? Object.values(data.lent_debts) : [];
+                    output += createTable(
+                        "💳 الديون المستلفة",
+                        ["الاسم الكامل", "شخص المستلف", "المبلغ (دج)", "التاريخ"],
+                        lent,
+                        rec => `
+                            <td>${rec["الاسم الكامل"] || "—"}</td>
+                            <td>${rec["شخص المستلف"] || "—"}</td>
+                            <td>${rec["المبلغ"] || "—"}</td>
+                            <td>${formatDateFromRecord(rec)}</td>
+                        `
+                    );
+
+                    document.getElementById("data-section").innerHTML = output;
                 })
-                .catch(e => {
-                    document.getElementById("data").innerHTML = "❌ خطأ في الاتصال";
+                .catch(err => {
+                    document.getElementById("data-section").innerHTML = 
+                        `<div style="text-align:center;color:red;padding:30px;">❌ خطأ في تحميل البيانات. تحقق من الاتصال.</div>`;
                 });
         }
     </script>
